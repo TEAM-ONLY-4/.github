@@ -1,5 +1,59 @@
 # 대용량 통신 요금 명세서 및 알림 발송 시스템
 
+## 💡 Technical Considerations 
+
+대용량 트래픽(100만 건)을 안정적으로 처리하기 위해 팀원들과 치열하게 고민하고 결정한 아키텍처 의사결정 과정입니다.
+
+### 1️⃣ Kafka Payload 설계: 전체 데이터 전송 vs ID 전송 (Claim Check Pattern)
+
+**🤔 고민:**
+대용량 청구서 발행 후 Kafka로 이벤트를 발행할 때, **메시지에 어떤 데이터를 담을 것인가**에 대해 고민했습니다.
+
+* **Option A (Full Payload):** 청구서, 회원 정보, 상세 내역 등 모든 데이터를 JSON에 담아 전송.
+* **Option B (ID Only):** 청구서의 PK(`bill_id`)만 전송하고, Consumer가 DB를 조회.
+
+**⚖️ 비교 및 결정:**
+| 구분 | Option A (Full Payload) | Option B (ID Only) ✅ |
+| :--- | :--- | :--- |
+| **Network I/O** | 100만 건 * 2KB = **2GB (높음)** | 100만 건 * 8Byte = **8MB (낮음)** |
+| **데이터 정합성** | 발행 시점과 발송 시점 차이로 **구형 데이터(Stale Data)** 발송 위험 | 발송 직전 DB를 조회하므로 **최신 데이터(Consistency)** 보장 |
+| **시스템 결합도** | DTO 변경 시 Producer/Consumer 동시 수정 필요 (강결합) | ID만 주고받으므로 영향도 최소화 (느슨한 결합) |
+
+---
+
+### 2️⃣ Batch Job 구조: 단일 Job vs 정산/발송 분리
+
+**🤔 고민:**
+"월별 요금 계산(Billing)"과 "청구서 발송(Notification)"을 하나의 Job으로 묶을지, 분리할지 고민했습니다.
+
+**⚖️ 비교 및 결정:**
+
+* **단일 Job:** 구현은 간단하지만, 발송 단계에서 실패 시 이미 완료된 정산 데이터까지 롤백되거나 트랜잭션 범위가 너무 길어지는 문제 발생.
+* **분리된 Job:** 정산이 완료된 후, 운영자가 데이터를 검증하고 원하는 시점에 발송할 수 있음.
+
+**✅ 결론:**
+**Job 1(정산)**과 **Job 2(발송 요청)**로 배치를 분리했습니다.
+
+---
+
+### 3️⃣ 대용량 데이터 처리와 성능 최적화
+
+**🤔 고민:**
+100만 건의 데이터를 정산하고 알림을 보낼 때, 시간이 너무 오래 걸리거나 OOM(Out of Memory)이 발생하는 것을 방지해야 했습니다.
+
+**✅ 해결 방안:**
+
+* **Chunk Processing:** Spring Batch의 Chunk Size를 **1,000**으로 설정하여 메모리 사용량을 일정하게 유지했습니다.
+* **Bulk Insert:** JDBC Template의 `batchUpdate` 옵션을 활성화하여 `INSERT` 쿼리를 묶어서 전송, DB I/O 비용을 획기적으로 줄였습니다.
+* **Kafka Partitioning:** Kafka Topic의 파티션을 늘리고 Consumer 서버를 스케일 아웃(Concurrency 조절)하여 발송 처리량을 병렬로 극대화했습니다.
+
+---
+
+### 4️⃣ ERD고민
+
+[ERD 사진]
+---
+
 ## 📋 기능 요구사항 (Functional Requirements)
 
 본 프로젝트는 **대용량 트래픽 상황**을 가정하여, 안정적인 **정산(Billing)**과 **알림 발송(Notification)** 시스템을 구축하는 것을 목표로 합니다.
