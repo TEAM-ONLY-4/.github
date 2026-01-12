@@ -69,15 +69,15 @@
 
 ### 프론트엔드
 
-<img width="80%" alt="스크린샷 2024-01-22 오후 11 43 48" src="https://github.com/woowacourse-teams/2023-hang-log/assets/45068522/9284b40e-c931-4f04-ac78-9c97a548338e">
+<img width="80%" src="">
 
 ### 백엔드
 
-<img width="80%" alt="스크린샷 2024-01-22 오후 11 43 16" src="https://github.com/woowacourse-teams/2023-hang-log/assets/45068522/b64dde4f-9467-4427-a361-e2301657efa4">
+<img width="80%" src="">
 
 ### 인프라
 
-<img width="80%" alt="스크린샷 2024-01-22 오후 11 44 27" src="https://github.com/woowacourse-teams/2023-hang-log/assets/45068522/d0e03eb4-e159-405b-b22e-3d3fa79b99b7">
+<img width="80%"  src="">
 
 <br>
 
