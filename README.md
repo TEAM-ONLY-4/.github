@@ -69,11 +69,12 @@
 
 ### 프론트엔드
 
-<img width="80%" src="">
+<img width="324" height="178" alt="image" src="https://github.com/user-attachments/assets/ab32efc2-5656-42cf-a59e-e311807b488e" />
+
 
 ### 백엔드
 
-src="<img width="886" height="390" alt="image" src="https://github.com/user-attachments/assets/f3d64491-0510-4edc-9787-76d9f71d71bc" />
+<img width="886" height="390" alt="image" src="https://github.com/user-attachments/assets/f3d64491-0510-4edc-9787-76d9f71d71bc" />
 
 ### 인프라
 
