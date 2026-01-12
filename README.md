@@ -12,12 +12,14 @@
 * **Option A (Full Payload):** 청구서, 회원 정보, 상세 내역 등 모든 데이터를 JSON에 담아 전송.
 * **Option B (ID Only):** 청구서의 PK(`bill_id`)만 전송하고, Consumer가 DB를 조회.
 
-**⚖️ 비교 및 결정:**
-| 구분 | Option A (Full Payload) | Option B (ID Only) ✅ |
+**⚖️ 비교 :**
+
+| 구분 | 옵션 A: Full Payload (전체 데이터 전송) | 옵션 B: Claim Check (ID만 전송) [추천] |
 | :--- | :--- | :--- |
-| **Network I/O** | 100만 건 * 2KB = **2GB (높음)** | 100만 건 * 8Byte = **8MB (낮음)** |
-| **데이터 정합성** | 발행 시점과 발송 시점 차이로 **구형 데이터(Stale Data)** 발송 위험 | 발송 직전 DB를 조회하므로 **최신 데이터(Consistency)** 보장 |
-| **시스템 결합도** | DTO 변경 시 Producer/Consumer 동시 수정 필요 (강결합) | ID만 주고받으므로 영향도 최소화 (느슨한 결합) |
+| **Kafka 부하** | **매우 높음 (Critical) 🚨**<br>- 100만 건 × 2KB = **2GB** 전송<br>- 디스크 I/O, 네트워크 대역폭 폭발 | **매우 낮음 (Good) ✅**<br>- 100만 건 × 8Byte = **8MB** 전송<br>- 네트워크 티도 안 남 |
+| **Consumer 부하** | **높음 (CPU)**<br>- 거대 JSON 역직렬화(Parsing) 비용 발생 | **보통 (Network)**<br>- DB 조회 네트워킹 발생 |
+| **DB 부하** | **없음**<br>- Consumer가 DB 안 감 | **있음 (그러나 제어 가능)**<br>- 100만 번의 SELECT 발생 |
+| **위험 요소** | **데이터 불일치 (치명적)**<br>- 보내는 사이에 정보 바뀌면 오발송 | **DB 부하**<br>- 쿼리 몰리면 DB 느려짐 |
 
 ---
 
@@ -51,7 +53,7 @@
 
 ### 4️⃣ ERD고민
 
-[ERD 사진]
+ERD 사진
 ---
 
 ## 📋 기능 요구사항 (Functional Requirements)
