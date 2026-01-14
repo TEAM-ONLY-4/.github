@@ -184,7 +184,7 @@ SMS 발송 역시 정해진 재시도 횟수만큼 시도했으나 실패한 경
 ---
 
 # Infra Architecture
-![alt text](image.png)
+<img width="1403" height="808" alt="image" src="https://github.com/user-attachments/assets/320d6f9e-6c5f-4ca4-bfb8-266f6be2d4a3" />
 
 
 ### 1) Batch & Kafka Consumer를 ECS Fargate(서버리스) 로 운영한 이유
