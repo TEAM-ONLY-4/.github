@@ -67,6 +67,8 @@ Writer:
 
 ## 2. 메시지 발송 요청 Batch Job
 
+<img width="1621" height="1612" alt="image" src="https://github.com/user-attachments/assets/e106a5d6-8e0e-4213-9601-13a399df2125" />
+
 ```
 🎯 목적: 당월 요금 청구서 발송 이벤트 발행
 - 생성된 요금 청구서 발송 이벤트를 Kafka로 발행
