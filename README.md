@@ -78,24 +78,18 @@ Writer:
 👉 트리거: 매일 특정 시간 or 관리자 버튼 클릭 or 등록된 예약 발송 일시
 
 Job: 회원별 요금 청구서 알림 발송 요청 생성
-Step 1: 알림 대상 추출 및 적재
+Step 1: Kafka에 알림 발송 요청 메시지 생성
 
-Reader: 해당 날짜 & 금지시간이 아닌 시간 & 아직 발송되지 않은 메시지를 받고 싶은 회원 및 해당 회원의 청구서 선별
-Processor: Reader에서 조회한 청구서 데이터를 알림 발송 대기 상태로 변환
-Writer: 필터링을 통과한 대상만 BillNotification 테이블에 상태 PENDING으로 저장
-
-Step 2: Kafka에 알림 발송 요청 메시지 생성 및 이벤트 발행
-
-Reader: BillNotification 테이블에서 발송 대기(PENDING) 상태인 데이터를 조회
-Processor: 내부 DB 엔티티를 외부 시스템 전송용 DTO로 변환
+Reader: 해당 날짜에 메시지를 받고 싶은 회원 및 해당 회원의 청구서와 청구 항목 조회
+Processor: Reader에서 조회한 데이터를 회원 및 청구서에 맞는 DTO로 생성
 Writer:
-    - Kafka Producer: notification-topic으로 알림 이벤트를 비동기 전송
-    - DB Updater: 전송 성공한 건에 한해 상태를 PUBLISHED로 변경하여 중복 발송을 방지
+- Kafka에 해당 청구서에 대한 알림 요청 발행
+	- Processor에서 생성한 DTO의 내용을 Email 토픽의 이벤트로 전달
+```
 
-현재 방식 선택 이유
-Step 1: 누구에게 보낼 것인가?(Targeting)에만 집중하여 정합성을 확보
-
-Step 2: 어떻게 보낼 것인가?(Delivery)에만 집중하여 전송 안정성을 확보
+### 현재 방식 선택 이유
+- 고객이 알림을 받고 싶은 날짜를 선택하기 때문에 매일 알림 대상을 선별해야 함
+- 알림을 받을 고객을 선정한 후, 금지 시간대를 피하여 알림 발송할 필요가 있음
 
 <br>
 
